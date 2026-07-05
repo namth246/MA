@@ -1,0 +1,270 @@
+:root {
+  --bg: #030813;
+  --card: #071229;
+  --cyan: #85e9ff;
+  --green: #39ff88;
+  --orange: #ff8a00;
+  --gold: #ffd700;
+  --blue: #1e90ff;
+  --red: #ff4d4d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #0b1d3d 0%, var(--bg) 42%, #000 100%);
+  color: #fff;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.page {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+h1 {
+  margin: 0;
+  font-size: 34px;
+  letter-spacing: 0.5px;
+}
+
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+  color: var(--green);
+  font-size: 18px;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 14px var(--green);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dot {
+    animation: pulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.subtitle {
+  margin-top: 6px;
+  color: #b8c3d8;
+  font-size: 18px;
+}
+
+.meta {
+  color: #b8c3d8;
+  font-size: 15px;
+  margin-top: 6px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chart-card {
+  position: relative;
+  margin-top: 22px;
+  background: linear-gradient(180deg, rgba(7, 18, 41, 0.96), rgba(3, 8, 19, 0.98));
+  border: 1px solid rgba(133, 233, 255, 0.24);
+  border-radius: 18px;
+  padding: 20px;
+  overflow: hidden;
+  box-shadow: 0 0 42px rgba(33, 167, 255, 0.1);
+}
+
+#chart {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 720px;
+}
+
+.panel {
+  margin-top: 18px;
+  background: rgba(7, 18, 41, 0.98);
+  border: 1px solid rgba(133, 233, 255, 0.18);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0 14px;
+}
+
+button {
+  background: #071229;
+  color: #fff;
+  border: 1px solid rgba(133, 233, 255, 0.34);
+  border-radius: 10px;
+  padding: 9px 13px;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--green);
+  box-shadow: 0 0 12px rgba(57, 255, 136, 0.18);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+h2 {
+  margin: 0 0 8px;
+  color: #d6f6ff;
+  font-size: 22px;
+}
+
+.hint {
+  color: #b8c3d8;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.table-wrap {
+  max-height: 440px;
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+th,
+td {
+  padding: 9px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: right;
+}
+
+th:first-child,
+td:first-child {
+  text-align: left;
+}
+
+th {
+  color: var(--cyan);
+  background: #081b3a;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.ok {
+  color: var(--green);
+  font-weight: bold;
+}
+
+.warn {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  border-radius: 12px;
+  background: rgba(255, 215, 0, 0.06);
+  color: #ffeca0;
+  font-size: 15px;
+}
+
+.error {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 77, 77, 0.35);
+  border-radius: 12px;
+  background: rgba(255, 77, 77, 0.06);
+  color: #ffb3b3;
+  font-size: 15px;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.metric {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.metric span {
+  color: #b8c3d8;
+}
+
+.metric b {
+  display: block;
+  font-size: 26px;
+  margin-top: 6px;
+}
+
+.green {
+  color: var(--green);
+}
+.orange {
+  color: var(--orange);
+}
+.gold {
+  color: var(--gold);
+}
+.blue {
+  color: var(--blue);
+}
+
+.insight p {
+  font-size: 17px;
+  line-height: 1.55;
+  margin: 8px 0;
+}
+
+@media (max-width: 900px) {
+  .metric-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  #chart {
+    height: 560px;
+  }
+}

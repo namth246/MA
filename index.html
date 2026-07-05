@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CNF Live Chart — Google Sheets Sync</title>
+  <link rel="stylesheet" href="styles/main.css" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" defer></script>
+  <script type="module" src="src/app.js" defer></script>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div>
+        <h1>
+          CNF LIVE DATA CHART ENGINE
+          <span class="live"><span class="dot" aria-hidden="true"></span>LIVE</span>
+        </h1>
+        <p class="subtitle">Dữ liệu tự động từ Google Sheets · Cập nhật mỗi 60 giây</p>
+        <p class="meta" id="lastUpdated">Đang khởi tạo...</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="refreshBtn">Làm mới</button>
+      </div>
+    </header>
+
+    <section class="chart-card" aria-label="Biểu đồ breadth">
+      <div id="chart"></div>
+    </section>
+
+    <section class="panel" aria-label="Bảng dữ liệu đồng bộ">
+      <h2>Bảng dữ liệu (đồng bộ từ Sheet Dem MA)</h2>
+      <p class="hint">
+        Nguồn: cột <b>A</b> (Ngày), <b>C</b> (C&gt;MA10), <b>M</b> (C&gt;MA20), <b>W</b> (C&gt;MA50), <b>AG</b> (C&gt;MA200).
+        Bảng chỉ đọc — chỉnh sửa trực tiếp trên Google Sheet.
+      </p>
+      <div class="table-wrap">
+        <table id="dataTable">
+          <thead>
+            <tr>
+              <th>Ngày</th>
+              <th>C&gt;MA10</th>
+              <th>C&gt;MA20</th>
+              <th>C&gt;MA50</th>
+              <th>C&gt;MA200</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="validationBox"></div>
+    </section>
+
+    <section class="panel" aria-label="Kiểm tra dữ liệu">
+      <h2>Data Audit</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Điểm kiểm tra</th>
+            <th>Ngày</th>
+            <th>C&gt;MA10</th>
+            <th>C&gt;MA20</th>
+            <th>C&gt;MA50</th>
+            <th>C&gt;MA200</th>
+            <th>Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody id="auditBody"></tbody>
+      </table>
+    </section>
+
+    <section class="panel" aria-label="Snapshot cuối kỳ">
+      <h2>Snapshot cuối kỳ</h2>
+      <div class="metric-grid">
+        <div class="metric"><span>C&gt;MA10</span><b class="green" id="m10">-</b></div>
+        <div class="metric"><span>C&gt;MA20</span><b class="orange" id="m20">-</b></div>
+        <div class="metric"><span>C&gt;MA50</span><b class="gold" id="m50">-</b></div>
+        <div class="metric"><span>C&gt;MA200</span><b class="blue" id="m200">-</b></div>
+      </div>
+    </section>
+
+    <section class="panel insight" aria-label="Insight CNF">
+      <h2>Insight CNF</h2>
+      <div id="insightBox"></div>
+    </section>
+  </div>
+</body>
+</html>
