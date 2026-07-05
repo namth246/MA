@@ -85,7 +85,7 @@ Sheet phải **công khai** (Anyone with the link can view).
 
 ```bash
 # 1. Clone repository
-git clone <repository-url>
+git clone https://github.com/ntd237/auto_update_data_excel_05072026.git
 cd auto_update_data_excel_05072026
 
 # 2. (Tuỳ chọn) Không cần npm install — dự án không có dependencies runtime
