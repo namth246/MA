@@ -1,4 +1,11 @@
-import { POLL_MS, SHEET_ID, ALLOW_DEVTOOLS, getDefaultSheetUrl, parseSheetUrl } from "./config.js";
+import {
+  POLL_MS,
+  ALLOW_DEVTOOLS,
+  getActiveSheetId,
+  getActiveSheetUrl,
+  parseSheetUrl,
+  setActiveSheetId,
+} from "./config.js";
 import { fetchSheetData } from "./sheetClient.js";
 import { serializeDataHash, toDisplayRows } from "./sheetParser.js";
 import { renderChart, updateAudit, updateSnapshotAndInsight } from "./chart.js";
@@ -15,7 +22,7 @@ let currentData = null;
 let lastHash = "";
 let pollTimer = null;
 let isLoading = false;
-let currentSheetId = SHEET_ID;
+let currentSheetId = getActiveSheetId();
 
 function setStatus(kind, message, target = "validation") {
   const boxId = target === "sheet" ? "sheetSourceStatus" : "validationBox";
@@ -116,6 +123,7 @@ function applySheetUrl() {
   const nextSheetId = parseSheetUrl(sheetUrlInput.value);
   if (nextSheetId !== currentSheetId) {
     currentSheetId = nextSheetId;
+    setActiveSheetId(nextSheetId);
     lastHash = "";
     currentData = null;
   }
@@ -132,7 +140,7 @@ function updateSheetSourceVisibility() {
 
   const sheetUrlInput = document.getElementById("sheetUrlInput");
   if (isUnlocked && sheetUrlInput && !sheetUrlInput.value) {
-    sheetUrlInput.value = getDefaultSheetUrl();
+    sheetUrlInput.value = getActiveSheetUrl();
   }
 }
 

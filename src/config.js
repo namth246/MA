@@ -14,8 +14,33 @@ export const SERIES_COLORS = {
   "C>MA200": "#1E90FF",
 };
 
+export const SHEET_ID_STORAGE_KEY = "cnf_sheet_id";
+
+export function getActiveSheetId() {
+  try {
+    const stored = localStorage.getItem(SHEET_ID_STORAGE_KEY);
+    if (stored && /^[a-zA-Z0-9-_]{20,}$/.test(stored)) {
+      return stored;
+    }
+  } catch {
+    // Storage may be unavailable in some environments.
+  }
+  return SHEET_ID;
+}
+
+/**
+ * @param {string} sheetId
+ */
+export function setActiveSheetId(sheetId) {
+  localStorage.setItem(SHEET_ID_STORAGE_KEY, sheetId);
+}
+
 export function getDefaultSheetUrl() {
   return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
+}
+
+export function getActiveSheetUrl() {
+  return `https://docs.google.com/spreadsheets/d/${getActiveSheetId()}/edit`;
 }
 
 /**
