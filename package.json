@@ -6,5 +6,8 @@
   "scripts": {
     "test": "node --test tests/**/*.test.js",
     "start": "npx serve ."
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.38.0"
   }
 }

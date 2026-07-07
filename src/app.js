@@ -1,11 +1,4 @@
-import {
-  POLL_MS,
-  ALLOW_DEVTOOLS,
-  getActiveSheetId,
-  getActiveSheetUrl,
-  parseSheetUrl,
-  setActiveSheetId,
-} from "./config.js";
+import { POLL_MS, SHEET_ID, ALLOW_DEVTOOLS, parseSheetUrl } from "./config.js";
 import { fetchSheetData } from "./sheetClient.js";
 import { serializeDataHash, toDisplayRows } from "./sheetParser.js";
 import { renderChart, updateAudit, updateSnapshotAndInsight } from "./chart.js";
@@ -14,7 +7,15 @@ import {
   isSheetSourceUnlocked,
   setSheetSourceUnlocked,
   verifySheetPin,
+  setSessionPin,
+  clearSessionPin,
+  getSessionPin,
 } from "./sheetAccess.js";
+import {
+  resolveActiveSheetId,
+  persistActiveSheetId,
+  syncRemoteSheetId,
+} from "./sheetConfigApi.js";
 import { initDevtoolsGuard } from "./devtoolsGuard.js";
 
 /** @type {ReturnType<import("./sheetParser.js").parseGvizRows> | null} */
@@ -22,7 +23,11 @@ let currentData = null;
 let lastHash = "";
 let pollTimer = null;
 let isLoading = false;
-let currentSheetId = getActiveSheetId();
+let currentSheetId = SHEET_ID;
+
+function buildActiveSheetUrl(sheetId = currentSheetId) {
+  return `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+}
 
 function setStatus(kind, message, target = "validation") {
   const boxId = target === "sheet" ? "sheetSourceStatus" : "validationBox";
@@ -77,6 +82,13 @@ export async function loadAndRender({ manual = false } = {}) {
   }
 
   try {
+    const syncedId = await syncRemoteSheetId(currentSheetId);
+    if (syncedId !== currentSheetId) {
+      currentSheetId = syncedId;
+      lastHash = "";
+      currentData = null;
+    }
+
     const data = await fetchSheetData(currentSheetId);
     const hash = serializeDataHash(data);
 
@@ -112,8 +124,13 @@ function startPolling() {
   pollTimer = setInterval(() => loadAndRender(), POLL_MS);
 }
 
-function applySheetUrl() {
+async function applySheetUrl() {
   if (!isSheetSourceUnlocked()) {
+    throw new Error("Cần mở khóa nguồn trước khi thay đổi link sheet");
+  }
+
+  const pin = getSessionPin();
+  if (!pin) {
     throw new Error("Cần mở khóa nguồn trước khi thay đổi link sheet");
   }
 
@@ -122,12 +139,11 @@ function applySheetUrl() {
 
   const nextSheetId = parseSheetUrl(sheetUrlInput.value);
   if (nextSheetId !== currentSheetId) {
-    currentSheetId = nextSheetId;
-    setActiveSheetId(nextSheetId);
+    currentSheetId = await persistActiveSheetId(nextSheetId, pin);
     lastHash = "";
     currentData = null;
   }
-  loadAndRender({ manual: true });
+  await loadAndRender({ manual: true });
 }
 
 function updateSheetSourceVisibility() {
@@ -140,7 +156,7 @@ function updateSheetSourceVisibility() {
 
   const sheetUrlInput = document.getElementById("sheetUrlInput");
   if (isUnlocked && sheetUrlInput && !sheetUrlInput.value) {
-    sheetUrlInput.value = getActiveSheetUrl();
+    sheetUrlInput.value = buildActiveSheetUrl();
   }
 }
 
@@ -165,6 +181,7 @@ function closeSheetPinDialog() {
 
 function unlockSheetSource(pin) {
   verifySheetPin(pin);
+  setSessionPin(String(pin).trim());
   setSheetSourceUnlocked(true);
   updateSheetSourceVisibility();
   closeSheetPinDialog();
@@ -172,6 +189,7 @@ function unlockSheetSource(pin) {
 
 function lockSheetSource() {
   setSheetSourceUnlocked(false);
+  clearSessionPin();
   const sheetUrlInput = document.getElementById("sheetUrlInput");
   if (sheetUrlInput) sheetUrlInput.value = "";
   setStatus("ok", "", "sheet");
@@ -215,19 +233,19 @@ function bindUi() {
   bindSheetAccessUi();
 
   refreshBtn?.addEventListener("click", () => loadAndRender({ manual: true }));
-  applySheetBtn?.addEventListener("click", () => {
+  applySheetBtn?.addEventListener("click", async () => {
     try {
-      applySheetUrl();
+      await applySheetUrl();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setStatus("error", msg, "sheet");
     }
   });
-  sheetUrlInput?.addEventListener("keydown", (event) => {
+  sheetUrlInput?.addEventListener("keydown", async (event) => {
     if (event.key !== "Enter") return;
     event.preventDefault();
     try {
-      applySheetUrl();
+      await applySheetUrl();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setStatus("error", msg, "sheet");
@@ -269,6 +287,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     await waitForPlotly();
+    currentSheetId = await resolveActiveSheetId();
     await loadAndRender();
     startPolling();
   } catch (err) {

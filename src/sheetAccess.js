@@ -34,3 +34,21 @@ export function setSheetSourceUnlocked(unlocked) {
   }
   sessionStorage.removeItem(SHEET_UNLOCK_STORAGE_KEY);
 }
+
+/** @type {string | null} */
+let sessionPin = null;
+
+/**
+ * @param {string} pin
+ */
+export function setSessionPin(pin) {
+  sessionPin = pin;
+}
+
+export function clearSessionPin() {
+  sessionPin = null;
+}
+
+export function getSessionPin() {
+  return sessionPin;
+}
