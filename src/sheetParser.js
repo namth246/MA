@@ -79,7 +79,7 @@ export function parseGvizRows(table) {
     });
   }
 
-  return result;
+  return result.sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
 }
 
 /**

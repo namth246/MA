@@ -76,6 +76,46 @@ describe("parseGvizRows", () => {
     assert.equal(rows[0].ma50, 30.77);
     assert.equal(rows[0].ma200, 29.96);
   });
+
+  it("sorts rows from oldest to newest when sheet data is returned newest first", () => {
+    const descendingTable = {
+      rows: [
+        {
+          c: [
+            { v: "03-06-2026" },
+            { v: 0.4, f: "40.00%" },
+            { v: 0.3, f: "30.00%" },
+            { v: 0.2, f: "20.00%" },
+            { v: 0.1, f: "10.00%" },
+          ],
+        },
+        {
+          c: [
+            { v: "02-06-2026" },
+            { v: 0.35, f: "35.00%" },
+            { v: 0.25, f: "25.00%" },
+            { v: 0.15, f: "15.00%" },
+            { v: 0.05, f: "5.00%" },
+          ],
+        },
+        {
+          c: [
+            { v: "01-06-2026" },
+            { v: 0.3, f: "30.00%" },
+            { v: 0.2, f: "20.00%" },
+            { v: 0.1, f: "10.00%" },
+            { v: 0.01, f: "1.00%" },
+          ],
+        },
+      ],
+    };
+
+    const rows = parseGvizRows(descendingTable);
+    assert.deepEqual(
+      rows.map((row) => row.dateText),
+      ["01-06-2026", "02-06-2026", "03-06-2026"]
+    );
+  });
 });
 
 describe("parseGvizResponse", () => {
