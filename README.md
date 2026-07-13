@@ -39,15 +39,15 @@ Dashboard web theo dõi **breadth thị trường CNF** (tỷ lệ cổ phiếu 
 
 ### Yêu cầu Sheet
 
-Tab **`Dem MA`** với các cột:
+Tab **`Đếm MA`** với các cột:
 
 | Cột | Nội dung |
 |-----|----------|
 | A | Ngày (`dd-mm-yyyy`) |
-| C | C>MA10 (%) |
-| M | C>MA20 (%) |
-| W | C>MA50 (%) |
-| AG | C>MA200 (%) |
+| B | C>MA10 (%) |
+| C | C>MA20 (%) |
+| D | C>MA50 (%) |
+| E | C>MA200 (%) |
 
 Sheet phải **công khai** (Anyone with the link can view).
 
@@ -148,9 +148,9 @@ Tất cả cấu hình nằm trong `src/config.js`:
 | Hằng số | Mặc định | Mô tả |
 |---------|----------|-------|
 | `SHEET_ID` | *(xem file)* | ID Google Sheet mặc định |
-| `SHEET_NAME` | `"Dem MA"` | Tên tab sheet |
+| `SHEET_NAME` | `"Đếm MA"` | Tên tab sheet |
 | `POLL_MS` | `10000` | Chu kỳ poll (ms) |
-| `GVIZ_QUERY` | `"select A,C,M,W,AG"` | Truy vấn cột gviz |
+| `GVIZ_QUERY` | `"select A,B,C,D,E"` | Truy vấn cột gviz |
 | `SHEET_ACCESS_PIN` | `"2406"` | Mã PIN 4 chữ số mở khóa nguồn Sheet |
 | `ALLOW_DEVTOOLS` | `false` | `true` = cho phép DevTools khi dev |
 
