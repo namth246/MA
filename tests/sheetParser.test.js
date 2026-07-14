@@ -58,7 +58,7 @@ describe("parseGvizRows", () => {
           { v: 0.2874, f: "28.74%" },
         ],
       },
-      { c: [null, { v: 0.5887 }, { v: 0.5 }, { v: 0.4 }, { v: 0.3 }] },
+      { c: [null, null, null, null, null] },
     ],
   };
 
@@ -114,6 +114,132 @@ describe("parseGvizRows", () => {
     assert.deepEqual(
       rows.map((row) => row.dateText),
       ["01-06-2026", "02-06-2026", "03-06-2026"]
+    );
+  });
+
+  it("dynamically maps columns based on labels instead of hardcoded indices", () => {
+    const customSchemaTable = {
+      cols: [
+        { id: "A", label: "CP>MA200", type: "number" },
+        { id: "B", label: "CP>MA50", type: "number" },
+        { id: "C", label: "Row Labels", type: "date" },
+        { id: "D", label: "CP>MA10", type: "number" },
+        { id: "E", label: "CP>MA20", type: "number" }
+      ],
+      rows: [
+        {
+          c: [
+            { v: 0.22, f: "22.00%" },
+            { v: 0.28, f: "28.00%" },
+            { v: "03-06-2026" },
+            { v: 0.40, f: "40.00%" },
+            { v: 0.30, f: "30.00%" }
+          ]
+        }
+      ]
+    };
+    const rows = parseGvizRows(customSchemaTable);
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].dateText, "03-06-2026");
+    assert.equal(rows[0].ma10, 40.00);
+    assert.equal(rows[0].ma20, 30.00);
+    assert.equal(rows[0].ma50, 28.00);
+    assert.equal(rows[0].ma200, 22.00);
+  });
+
+  it("parses mixed date formats correctly (MM-DD-YYYY for days <= 12 and DD-MM-YYYY for days > 12)", () => {
+    const mixedDateTable = {
+      cols: [
+        { id: "A", label: "Row Labels", type: "date" },
+        { id: "B", label: "CP>MA10", type: "number" },
+        { id: "C", label: "CP>MA20", type: "number" },
+        { id: "D", label: "CP>MA50", type: "number" },
+        { id: "E", label: "CP>MA200", type: "number" }
+      ],
+      rows: [
+        {
+          c: [
+            { f: "07-10-2026" }, // July 10th (both parts <= 12 -> swap to 10-07)
+            { v: 0.4 }, { v: 0.3 }, { v: 0.2 }, { v: 0.1 }
+          ]
+        },
+        {
+          c: [
+            { f: "07-09-2026" }, // July 9th (both parts <= 12 -> swap to 09-07)
+            { v: 0.4 }, { v: 0.3 }, { v: 0.2 }, { v: 0.1 }
+          ]
+        },
+        {
+          c: [
+            { f: "07-08-2026" }, // July 8th (both parts <= 12 -> swap to 08-07)
+            { v: 0.4 }, { v: 0.3 }, { v: 0.2 }, { v: 0.1 }
+          ]
+        },
+        {
+          c: [
+            { f: "13-07-2026" }, // July 13th (day > 12 -> keep 13-07)
+            { v: 0.4 }, { v: 0.3 }, { v: 0.2 }, { v: 0.1 }
+          ]
+        }
+      ]
+    };
+    const rows = parseGvizRows(mixedDateTable);
+    assert.equal(rows.length, 4);
+    // Sort oldest to newest: July 8th, July 9th, July 10th, July 13th
+    assert.equal(rows[0].dateText, "08-07-2026");
+    assert.equal(rows[1].dateText, "09-07-2026");
+    assert.equal(rows[2].dateText, "10-07-2026");
+    assert.equal(rows[3].dateText, "13-07-2026");
+  });
+
+  it("fills in missing business days by interpolating and extrapolating", () => {
+    const missingDateTable = {
+      cols: [
+        { id: "A", label: "Row Labels", type: "date" },
+        { id: "B", label: "CP>MA10", type: "number" },
+        { id: "C", label: "CP>MA20", type: "number" },
+        { id: "D", label: "CP>MA50", type: "number" },
+        { id: "E", label: "CP>MA200", type: "number" }
+      ],
+      rows: [
+        {
+          c: [
+            null, // Extrapolates to July 13th (Monday) from Row 1's July 10th (Friday)
+            { v: 0.4 }, { v: 0.3 }, { v: 0.2 }, { v: 0.1 }
+          ]
+        },
+        {
+          c: [
+            { f: "07-10-2026" }, // July 10th (Friday)
+            { v: 0.4 }, { v: 0.3 }, { v: 0.2 }, { v: 0.1 }
+          ]
+        },
+        {
+          c: [
+            null, // Interpolates to July 9th (Thursday)
+            { v: 0.4 }, { v: 0.3 }, { v: 0.2 }, { v: 0.1 }
+          ]
+        },
+        {
+          c: [
+            null, // Interpolates to July 8th (Wednesday)
+            { v: 0.4 }, { v: 0.3 }, { v: 0.2 }, { v: 0.1 }
+          ]
+        },
+        {
+          c: [
+            { f: "07-07-2026" }, // July 7th (Tuesday)
+            { v: 0.4 }, { v: 0.3 }, { v: 0.2 }, { v: 0.1 }
+          ]
+        }
+      ]
+    };
+    const rows = parseGvizRows(missingDateTable);
+    assert.equal(rows.length, 5);
+    // Sort oldest to newest: July 7, 8, 9, 10, 13
+    assert.deepEqual(
+      rows.map(r => r.dateText),
+      ["07-07-2026", "08-07-2026", "09-07-2026", "10-07-2026", "13-07-2026"]
     );
   });
 });
